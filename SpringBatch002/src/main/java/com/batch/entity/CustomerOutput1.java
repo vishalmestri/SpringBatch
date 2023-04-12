@@ -13,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Customer_output")
+@Table(name = "Customer_output_1")
 //@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerOutput {
+public class CustomerOutput1 {
 
 	@Id
 	@Column(name = "id")
