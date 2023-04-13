@@ -22,6 +22,8 @@ import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,9 +37,11 @@ import com.batch.entity.CustomerOutput1;
 import com.batch.pojo.CustomerOutputWriter;
 import com.batch.repo.CustomerInputRepo;
 import com.batch.repo.CustomerOutputRepo;
+import com.zaxxer.hikari.HikariDataSource;
 
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 
 @Configuration
@@ -58,9 +62,11 @@ public class SpringBatchConfig {
 	private CustomerOutputRepo customerOutputRepo;
 	
 	@Autowired
+	@Qualifier("dataSource")
 	private DataSource dataSource;
 	
 	
+
 	
 	 @Bean
 	    public TaskExecutor taskExecutor() {
@@ -94,6 +100,45 @@ public class SpringBatchConfig {
 				.build();
 	}
 	
+	
+	@Bean(name="readerCustomerOutput")
+	//@StepScope
+	public JdbcPagingItemReader<CustomerOutput> readerCustomerOutput(){
+		System.out.println("readerCustomerOutput|Thread="+Thread.currentThread().getName());
+		//System.out.println("(dataSource==null)="+(dataSource==null));
+		return new JdbcPagingItemReaderBuilder<CustomerOutput>()
+				.name("ReadingCustomerOutput")
+				
+				.dataSource(dataSource)
+				
+				.selectClause("select * ")
+				.fromClause("from customer_output")
+				.whereClause("name like concat('%',:name,'%')")
+				.sortKeys(Collections.singletonMap("id", Order.ASCENDING))
+				.beanRowMapper(CustomerOutput.class)
+				.pageSize(100)
+				.build();
+	}
+	
+	@Bean(name="readerCustomerOutput1")
+	//@StepScope
+	public JdbcPagingItemReader<CustomerOutput1> readerCustomerOutput1(){
+		System.out.println("readerCustomerOutput1|Thread="+Thread.currentThread().getName());
+		//System.out.println("(dataSource==null)="+(dataSource==null));
+		return new JdbcPagingItemReaderBuilder<CustomerOutput1>()
+				.name("ReadingCustomerOutput1")
+				
+				.dataSource(dataSource)
+				
+				.selectClause("select * ")
+				.fromClause("from customer_output_1")
+				.whereClause("name like concat('%',:name,'%')")
+				.sortKeys(Collections.singletonMap("id", Order.ASCENDING))
+				.beanRowMapper(CustomerOutput1.class)
+				.pageSize(100)
+				.build();
+	}
+	
 	@Bean
 	public AsyncItemProcessor<CustomerInput, CustomerOutputWriter> asyncProcessor() {
         AsyncItemProcessor<CustomerInput, CustomerOutputWriter> asyncItemProcessor = new AsyncItemProcessor<>();
@@ -119,6 +164,15 @@ public class SpringBatchConfig {
 		System.out.println("reader-2");
 		return new CustomerProcessoer();
 	}
+	
+	@Bean
+//	@StepScope
+	public CustomerProcessoerNew processorNew() {
+		System.out.println("reader-2");
+		return new CustomerProcessoerNew();
+	}
+	
+	
 	@Bean
 	//@StepScope
 	public void writer(CustomerOutput output) {
@@ -199,7 +253,7 @@ public class SpringBatchConfig {
 	}
 	
 	@Bean
-	public ItemWriter<CustomerOutputWriter> writer1(){
+	public ItemWriter<CustomerOutputWriter> writerOld(){
 		return new MyItemWriter();
 	}
 	
@@ -207,12 +261,12 @@ public class SpringBatchConfig {
 	 @Bean
 	    public AsyncItemWriter<CustomerOutputWriter> asyncWriter() {
 	        AsyncItemWriter<CustomerOutputWriter> asyncItemWriter = new AsyncItemWriter<>();
-	        asyncItemWriter.setDelegate(writer2());
+	        asyncItemWriter.setDelegate(writerNew());
 	        return asyncItemWriter;
 	    }
 	 
 	 @Bean
-		public ItemWriter<CustomerOutputWriter> writer2(){
+		public ItemWriter<CustomerOutputWriter> writerNew(){
 			return new MyNewItemWriter();
 		}
 	
@@ -220,7 +274,7 @@ public class SpringBatchConfig {
 	public Step step01() {
 		System.out.println("STEP...|Thread="+Thread.currentThread().getName());
 		return stepBuilderFactory.get("db-setup")//.<CustomerInput,CustomerOutput>chunk(10)
-				.<CustomerInput, Future<CustomerOutputWriter>>chunk(100)
+				.<CustomerInput, Future<CustomerOutputWriter>>chunk(50)
 				.reader(reader())
 				.processor(asyncProcessor())
 				.writer(asyncWriter())

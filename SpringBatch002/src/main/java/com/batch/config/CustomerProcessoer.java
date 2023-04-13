@@ -1,18 +1,30 @@
 package com.batch.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.batch.entity.CustomerInput;
 import com.batch.entity.CustomerOutput;
 import com.batch.entity.CustomerOutput1;
 import com.batch.pojo.CustomerOutputWriter;
+import com.batch.repo.CustomerOutputRepo;
+import com.batch.repo.CustomerOutputRepo1;
 
 public class CustomerProcessoer implements ItemProcessor<CustomerInput, CustomerOutputWriter> {
 
+	
+	@Autowired
+	private CustomerOutputRepo customerOutputRepo;
+
+	@Autowired
+	private CustomerOutputRepo1 customerOutputRepo1;
+	
+	
 	@Override
 	public CustomerOutputWriter process(CustomerInput input) throws Exception {
 		Random r=new Random();
@@ -91,6 +103,10 @@ public class CustomerProcessoer implements ItemProcessor<CustomerInput, Customer
 		cust.setUpdateList1(updatelist_1);
 		
 		
+		Collection<CustomerOutput> outputlist_1=customerOutputRepo.findAllActiveUsersNative(input.getName());
+		outputlist_1.stream().forEach(c->System.out.println("[1]input.getName()=>"+c));
+		Collection<CustomerOutput1> outputlist_2=customerOutputRepo1.findAllActiveUsersNative(input.getName());
+		outputlist_2.stream().forEach(c->System.out.println("[2]input.getName()=>"+c));
 		
 		return cust;
 	}

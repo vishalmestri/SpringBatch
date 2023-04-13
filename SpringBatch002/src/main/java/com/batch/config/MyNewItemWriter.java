@@ -34,9 +34,11 @@ public class MyNewItemWriter implements ItemWriter<CustomerOutputWriter>{
 	@Override
 	public void write(List<? extends CustomerOutputWriter> items) throws Exception {
 		// TODO Auto-generated method stub
-		
+		System.out.println("MyNewItemWriter--|Thread="+Thread.currentThread().getName());
 		items.stream().forEach(item-> {
 			try {
+				
+				
 				jdbcBatchItemWriter1.write(item.getList());
 				jdbcBatchItemWriter2.write(item.getList1());
 				jdbcBatchItemWriter3.write(item.getUpdateList());
