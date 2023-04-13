@@ -24,6 +24,9 @@ public class MyItemWriter implements ItemWriter<CustomerOutputWriter>{
 		items.stream().forEach(item-> {
 			customerOutputRepo.saveAllAndFlush(item.getList());
 			customerOutputRepo1.saveAllAndFlush(item.getList1());
+			customerOutputRepo.saveAllAndFlush(item.getUpdateList());
+			customerOutputRepo1.saveAllAndFlush(item.getUpdateList1());
+			
 		});
 		//items.stream().forEach(item-> customerOutputRepo.saveAllAndFlush(item.getList()));
 	}

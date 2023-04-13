@@ -126,7 +126,7 @@ public class SpringBatchConfig {
 		customerOutputRepo.save(output);
 	}
 	
-	@Bean
+	@Bean(name="customerInsert")
 	public JdbcBatchItemWriter<CustomerOutput> customerWriter1(){
 		JdbcBatchItemWriter<CustomerOutput> itemWriter= new JdbcBatchItemWriter<>();
 		itemWriter.setDataSource(dataSource);
@@ -136,11 +136,33 @@ public class SpringBatchConfig {
 		return itemWriter;
 	}
 	
-	@Bean
+	@Bean(name="customer1Insert")
 	public JdbcBatchItemWriter<CustomerOutput1> customerWriter2(){
 		JdbcBatchItemWriter<CustomerOutput1> itemWriter= new JdbcBatchItemWriter<>();
 		itemWriter.setDataSource(dataSource);
 		itemWriter.setSql("INSERT INTO CUSTOMER_OUTPUT_1 (gender,name) VALUES(:gender,:name)");
+		
+		itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
+		return itemWriter;
+	}
+	
+	
+	@Bean(name="customerUpdate")
+	public JdbcBatchItemWriter<CustomerOutput> customerUpdate3(){
+		JdbcBatchItemWriter<CustomerOutput> itemWriter= new JdbcBatchItemWriter<>();
+		itemWriter.setDataSource(dataSource);
+		itemWriter.setSql("UPDATE CUSTOMER_OUTPUT SET gender= :gender, name= :name where id = :id");
+		
+		itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
+		return itemWriter;
+	}
+	
+	
+	@Bean(name="customer1Update")
+	public JdbcBatchItemWriter<CustomerOutput1> customerUpdate4(){
+		JdbcBatchItemWriter<CustomerOutput1> itemWriter= new JdbcBatchItemWriter<>();
+		itemWriter.setDataSource(dataSource);
+		itemWriter.setSql("UPDATE CUSTOMER_OUTPUT_1 SET gender= :gender, name= :name where id = :id");
 		
 		itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
 		return itemWriter;

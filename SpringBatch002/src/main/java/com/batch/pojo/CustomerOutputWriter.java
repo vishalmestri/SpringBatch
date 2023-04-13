@@ -18,4 +18,6 @@ public class CustomerOutputWriter {
 
 	List<CustomerOutput> list;
 	List<CustomerOutput1> list1;
+	List<CustomerOutput> updateList;
+	List<CustomerOutput1> updateList1;
 }
